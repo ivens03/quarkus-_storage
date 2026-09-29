@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 
-/** Camada HTTP: recebe a requisição, delega ao service e monta a resposta. Erros viram exceções (ver GlobalExceptionHandler). */
 @Path("/midias")
 public class MidiaResource {
 

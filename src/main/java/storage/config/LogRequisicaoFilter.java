@@ -1,8 +1,7 @@
-package storage.filter;
+package storage.config;
 
 import io.vertx.ext.web.RoutingContext;
 import org.jboss.resteasy.reactive.server.ServerRequestFilter;
-import storage.config.LogPadrao;
 
 /**
  * Aplica o padrão de log (LogPadrao) a toda requisição HTTP: abre o rastreio, registra o início
