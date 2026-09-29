@@ -2,6 +2,7 @@ package storage.service;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import storage.config.LogPadrao;
 import storage.exception.exception.FormatoNaoAceitoException;
 import storage.exception.exception.MidiaNaoEncontradaException;
 import storage.exception.exception.TamanhoExcedidoException;
@@ -18,6 +19,8 @@ import java.nio.file.Path;
 @ApplicationScoped
 public class MidiaService {
 
+    private static final LogPadrao LOG = LogPadrao.de(MidiaService.class);
+
     @Inject
     MidiaRepository repository;
 
@@ -31,7 +34,9 @@ public class MidiaService {
         }
 
         try (InputStream conteudo = Files.newInputStream(arquivo)) {
-            return repository.salvar(tipo, conteudo);
+            Midia midia = repository.salvar(tipo, conteudo);
+            LOG.info("Mídia salva: id=%s, tipo=%s, %d bytes", midia.id(), midia.contentType(), midia.tamanho());
+            return midia;
         }
     }
 
@@ -47,6 +52,7 @@ public class MidiaService {
         if (!repository.apagar(id)) {
             throw new MidiaNaoEncontradaException();
         }
+        LOG.info("Mídia apagada: id=%s", id);
     }
 
     private static byte[] lerAssinatura(Path arquivo) throws IOException {

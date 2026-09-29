@@ -4,8 +4,8 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
-import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
+import storage.config.LogPadrao;
 import storage.exception.dto.ErroResponse;
 import storage.exception.exception.ArquivoAusenteException;
 import storage.exception.exception.FormatoNaoAceitoException;
@@ -20,7 +20,7 @@ import storage.exception.exception.TamanhoExcedidoException;
  */
 public class GlobalExceptionHandler {
 
-    private static final Logger LOG = Logger.getLogger(GlobalExceptionHandler.class);
+    private static final LogPadrao LOG = LogPadrao.de(GlobalExceptionHandler.class);
 
     // ---------- Erros do storage ----------
 
@@ -47,6 +47,7 @@ public class GlobalExceptionHandler {
     /** O HTTP pede o tamanho real do arquivo no Content-Range de uma resposta 416. */
     @ServerExceptionMapper
     public Response intervaloInvalido(IntervaloInvalidoException e) {
+        LOG.aviso("%d %s", Status.REQUESTED_RANGE_NOT_SATISFIABLE.getStatusCode(), e.getMessage());
         return Response.status(Status.REQUESTED_RANGE_NOT_SATISFIABLE)
                 .header("Content-Range", "bytes */" + e.tamanhoTotal())
                 .type(MediaType.APPLICATION_JSON)
@@ -62,6 +63,7 @@ public class GlobalExceptionHandler {
      */
     @ServerExceptionMapper
     public Response http(WebApplicationException e) {
+        LOG.aviso("%d %s", e.getResponse().getStatus(), e.getMessage());
         return Response.fromResponse(e.getResponse())
                 .type(MediaType.APPLICATION_JSON)
                 .entity(new ErroResponse(e.getMessage()))
@@ -73,11 +75,15 @@ public class GlobalExceptionHandler {
     /** Erro não previsto: detalhes só no log, nunca na resposta (podem expor dados internos). */
     @ServerExceptionMapper
     public Response inesperado(Exception e) {
-        LOG.error("Erro inesperado ao processar a requisição", e);
+        LOG.erro("Erro inesperado ao processar a requisição", e);
         return erro(Status.INTERNAL_SERVER_ERROR, "Erro interno no servidor");
     }
 
+    /** Erros previstos (4xx) vão para o log como WARN, só com a mensagem: não precisam de stack trace. */
     private static Response erro(Status status, String mensagem) {
+        if (status != Status.INTERNAL_SERVER_ERROR) {
+            LOG.aviso("%d %s", status.getStatusCode(), mensagem);
+        }
         return Response.status(status)
                 .type(MediaType.APPLICATION_JSON)
                 .entity(new ErroResponse(mensagem))
