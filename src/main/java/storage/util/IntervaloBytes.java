@@ -1,19 +1,19 @@
-package storage.midia;
+package storage.util;
 
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /** Trecho do arquivo pedido pelo cabeçalho HTTP Range; início e fim são inclusivos. */
-record IntervaloBytes(long inicio, long fim) {
+public record IntervaloBytes(long inicio, long fim) {
 
     private static final Pattern FORMATO = Pattern.compile("bytes=(\\d{0,18})-(\\d{0,18})");
 
-    long tamanho() {
+    public long tamanho() {
         return fim - inicio + 1;
     }
 
-    static IntervaloBytes inteiro(long total) {
+    public static IntervaloBytes inteiro(long total) {
         return new IntervaloBytes(0, total - 1);
     }
 
@@ -24,7 +24,7 @@ record IntervaloBytes(long inicio, long fim) {
      *   bytes=-500     os últimos 500 bytes
      * Vazio quando o cabeçalho é inválido ou o trecho está fora do arquivo.
      */
-    static Optional<IntervaloBytes> ler(String cabecalho, long total) {
+    public static Optional<IntervaloBytes> ler(String cabecalho, long total) {
         Matcher m = FORMATO.matcher(cabecalho.trim());
         if (!m.matches()) {
             return Optional.empty();
