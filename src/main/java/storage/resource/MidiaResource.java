@@ -46,7 +46,7 @@ public class MidiaResource {
         if (arquivo == null) {
             throw new ArquivoAusenteException();
         }
-        Midia midia = service.salvar(arquivo.fileName(), arquivo.uploadedFile());
+        Midia midia = service.salvar(arquivo.uploadedFile());
         return Response.created(URI.create("/midias/" + midia.id()))
                 .entity(MidiaSalvaResponse.de(midia))
                 .build();

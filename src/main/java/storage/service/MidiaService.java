@@ -18,13 +18,11 @@ import java.nio.file.Path;
 @ApplicationScoped
 public class MidiaService {
 
-    private static final String NOME_PADRAO = "sem-nome";
-
     @Inject
     MidiaRepository repository;
 
     /** Valida formato e tamanho de um arquivo que já está em disco e, se estiver tudo certo, grava. */
-    public Midia salvar(String nome, Path arquivo) throws IOException {
+    public Midia salvar(Path arquivo) throws IOException {
         TipoMidia tipo = TipoMidia.detectar(lerAssinatura(arquivo))
                 .orElseThrow(FormatoNaoAceitoException::new);
 
@@ -33,7 +31,7 @@ public class MidiaService {
         }
 
         try (InputStream conteudo = Files.newInputStream(arquivo)) {
-            return repository.salvar(nome == null || nome.isBlank() ? NOME_PADRAO : nome, tipo, conteudo);
+            return repository.salvar(tipo, conteudo);
         }
     }
 
